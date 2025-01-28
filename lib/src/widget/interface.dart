@@ -41,6 +41,7 @@ abstract class CloudflareTurnstile {
     this.onTokenReceived,
     this.onTokenExpired,
     this.onError,
+    this.nonce,
   }) : options = options ?? TurnstileOptions();
 
   /// This [siteKey] is associated with the corresponding widget configuration
@@ -65,6 +66,11 @@ abstract class CloudflareTurnstile {
   ///
   /// Defaults to 'http://localhost/'.
   final String baseUrl;
+
+  /// An optional nonce value that can be used to allow arbitrary loads with CSP
+  /// (Content Security Policy) headers.
+  /// Won't be included in the tags if it's null.
+  final String? nonce;
 
   /// Configuration options for the Turnstile widget.
   ///

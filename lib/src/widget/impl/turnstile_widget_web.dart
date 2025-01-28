@@ -24,21 +24,24 @@ String _createViewType() {
   return '_iframe$iframeId';
 }
 
-String _embedWebIframeJsConnector(String source, String windowDisambiguator) {
+String _embedWebIframeJsConnector(
+  String source,
+  String windowDisambiguator,
+  String? nonce,
+) {
   return _embedJsInHtmlSource(
     source,
     {
-      'parent.$_jsToDartConnectorFN$windowDisambiguator && parent.$_jsToDartConnectorFN$windowDisambiguator(window)'
+      'parent.$_jsToDartConnectorFN$windowDisambiguator && parent.$_jsToDartConnectorFN$windowDisambiguator(window)',
     },
+    nonce,
   );
 }
 
 String _embedJsInHtmlSource(
-  String source,
-  Set<String> jsContents,
-) {
+    String source, Set<String> jsContents, String? nonce) {
   const newLine = '\n';
-  const scriptOpenTag = '<script>';
+  final scriptOpenTag = '<script nonce="$nonce">';
   const scriptCloseTag = '</script>';
   final jsContent = jsContents.reduce(
     (prev, elem) => prev + newLine * 2 + elem,
@@ -74,6 +77,7 @@ class CloudflareTurnstile extends StatefulWidget
     this.onTokenReceived,
     this.onTokenExpired,
     this.onError,
+    this.nonce,
   }) : options = options ?? TurnstileOptions() {
     if (action != null) {
       assert(
@@ -137,6 +141,12 @@ class CloudflareTurnstile extends StatefulWidget
   /// Defaults to 'http://localhost/'.
   @override
   final String baseUrl;
+
+  /// An optional nonce value that can be used to allow arbitrary loads with CSP
+  /// (Content Security Policy) headers.
+  /// Won't be included in the tags if it's null.
+  @override
+  final String? nonce;
 
   /// Configuration options for the Turnstile widget.
   ///
@@ -453,8 +463,10 @@ class _CloudflareTurnstileState extends State<CloudflareTurnstile> {
         onTurnstileError: _errorJSHandler,
         onTokenExpired: _tokenExpiredJSHandler,
         onWidgetCreated: _widgetCreatedJSHandler,
+        nonce: widget.nonce,
       ),
       iframeViewType,
+      widget.nonce,
     );
   }
 
@@ -560,9 +572,10 @@ class _TurnstileInvisible extends CloudflareTurnstile {
       onTurnstileError: _errorJSHandler,
       onTokenExpired: _tokenExpiredJSHandler,
       onWidgetCreated: _widgetCreatedJSHandler,
+      nonce: nonce,
     );
 
-    _iframe.srcdoc = _embedWebIframeJsConnector(data, _iframeViewType);
+    _iframe.srcdoc = _embedWebIframeJsConnector(data, _iframeViewType, nonce);
     _iframe.style.display = 'none';
 
     _connectJsToFlutter();

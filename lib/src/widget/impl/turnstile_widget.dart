@@ -34,6 +34,7 @@ class CloudflareTurnstile extends StatefulWidget
     this.onTokenReceived,
     this.onTokenExpired,
     this.onError,
+    this.nonce,
   }) : options = options ?? TurnstileOptions() {
     if (action != null) {
       assert(
@@ -97,6 +98,12 @@ class CloudflareTurnstile extends StatefulWidget
   /// Defaults to 'http://localhost/'.
   @override
   final String baseUrl;
+
+  /// An optional nonce value that can be used to allow arbitrary loads with CSP
+  /// (Content Security Policy) headers.
+  /// Won't be included in the tags if it's null.
+  @override
+  final String? nonce;
 
   /// Configuration options for the Turnstile widget.
   ///

@@ -11,12 +11,13 @@ String htmlData({
   required String onWidgetCreated,
   String? action,
   String? cData,
+  String? nonce,
 }) {
   final exp = RegExp(
     '<TURNSTILE_(SITE_KEY|ACTION|CDATA|THEME|SIZE|LANGUAGE|RETRY|RETRY_INTERVAL|REFRESH_EXPIRED|REFRESH_TIMEOUT|READY|TOKEN_RECIVED|ERROR|TOKEN_EXPIRED|CREATED)>',
   );
 
-  final replacedText = _source.replaceAllMapped(exp, (match) {
+  var replacedText = _source.replaceAllMapped(exp, (match) {
     switch (match.group(1)) {
       case 'SITE_KEY':
         return siteKey;
@@ -50,6 +51,11 @@ String htmlData({
         return match.group(0) ?? '';
     }
   });
+
+  if (nonce != null) {
+    replacedText = replacedText.replaceAll('<script', '<script nonce="$nonce"')
+        .replaceAll('<style', '<style nonce="$nonce"');
+  }
 
   return replacedText;
 }
